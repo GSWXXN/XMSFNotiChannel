@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/adapter_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_permotion_round"
+    android:baselineAligned="false"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center|start"
+    android:orientation="horizontal"
+    android:padding="15dp"
+    tools:ignore="HardcodedText">
+
+    <ImageView
+        android:id="@+id/adp_app_icon"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_success"
+        android:contentDescription="icon" />
+
+    <TextView
+        android:id="@+id/adp_app_name"
+        android:layout_height="wrap_content"
+
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:singleLine="true"
+        android:text="APP 名称"
+        android:textColor="@color/colorTextGray"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/adp_app_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="状态" />
+
+</LinearLayout>

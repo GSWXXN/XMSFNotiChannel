@@ -1,0 +1,18 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://api.xposed.info/" }
+        maven { url 'https://jitpack.io' }
+    }
+}
+rootProject.name = "你这运营消息根本就全都是广告吧"
+include ':app'

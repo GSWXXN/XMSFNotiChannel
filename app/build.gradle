@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp' version '1.7.20-1.0.6'
+}
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.gswxxn.xmsfnotichannel"
+        minSdk 28
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    namespace 'com.gswxxn.xmsfnotichannel'
+}
+
+dependencies {
+    implementation 'com.github.tiann:FreeReflection:3.1.0'
+    implementation 'com.highcapable.yukihookapi:api:1.1.4'
+    implementation 'androidx.core:core:1.9.0'
+    compileOnly 'de.robv.android.xposed:api:82'
+    ksp 'com.highcapable.yukihookapi:ksp-xposed:1.1.4'
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.3")
+}

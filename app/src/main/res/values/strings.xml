@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">你这运营消息根本就全都是广告吧</string>
+
+    <string name="module_version">模块版本：%s</string>
+    <string name="module_is_not_active">模块未激活</string>
+    <string name="module_is_active">模块已激活</string>
+    <string name="xposed_framework_version">Activated by %s API %d</string>
+    <string name="loading">正在加载……</string>
+    <string name="check_active_toast">请检查模块是否激活</string>
+    <string name="did_not_sent_operation_notification">未发送过运营消息</string>
+    <string name="disabled_operation_notification">已关闭运营消息</string>
+    <string name="enabled_operation_notification">已开启运营消息</string>
+    <string name="only_miui">该应用只能运行在MIUI系统中</string>
+    <string name="try_reboot">暂未获得权限，请尝试重启手机</string>
+    <string name="start_check">开始检测</string>
+    <string name="recheck">重新检测</string>
+    <string name="enable_all">全部开启</string>
+    <string name="disable_all">全部关闭</string>
+    <string name="version">v%s</string>
+    <string name="follow_me">点个关注，不迷路</string>
+    <string name="star_project">点个小星星呗~</string>
+    <string name="thanks_to">感谢 %s</string>
+    <string name="about">关于</string>
+    <string name="developer">开发者</string>
+    <string name="developer_milu">迷璐</string>
+    <string name="open_source_repo">开源仓库</string>
+    <string name="open_source_license">开放源代码许可</string>
+
+</resources>
