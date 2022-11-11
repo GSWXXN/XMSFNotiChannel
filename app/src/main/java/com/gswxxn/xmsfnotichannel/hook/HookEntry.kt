@@ -6,6 +6,7 @@ import com.gswxxn.xmsfnotichannel.BuildConfig
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.log.YukiHookLogger
+import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 
 @InjectYukiHookWithXposed
@@ -25,8 +26,13 @@ class HookEntry : IYukiHookXposedInit {
                 injectMember {
                     method { name = "isCallerSystemOrPhone" }
                     beforeHook {
-                        if (appContext!!.packageManager.getPackageUid(BuildConfig.APPLICATION_ID, PackageManager.MATCH_ALL) == Binder.getCallingUid()) {
-                            resultTrue()
+                        try {
+                            if (appContext!!.packageManager.getPackageUid(BuildConfig.APPLICATION_ID, PackageManager.MATCH_ALL) == Binder.getCallingUid()) {
+                                resultTrue()
+                            }
+                        }
+                        catch (e : PackageManager.NameNotFoundException) {
+                            loggerE(msg = "Not find pm of ${BuildConfig.APPLICATION_ID}, may be try later?")
                         }
                     }
                 }
