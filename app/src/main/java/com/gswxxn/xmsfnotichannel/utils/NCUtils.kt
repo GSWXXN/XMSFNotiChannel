@@ -5,26 +5,28 @@ import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
+import android.os.IBinder
 import java.lang.reflect.Method
 
-@SuppressLint("PrivateApi", "SoonBlockedPrivateApi")
+@SuppressLint("PrivateApi", "SoonBlockedPrivateApi", "DiscouragedPrivateApi")
 class NCUtils(private val context : Context) {
 
-    private val clazz: Class<*> by lazy {
-        context.createPackageContext(
-            "com.android.settings",
-            Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY
-        ).classLoader.loadClass(
-            "com.android.server.notification.NotificationManagerServiceCompat")
+    private val sINM by lazy {
+        val notificationService = Class.forName("android.os.ServiceManager").getDeclaredMethod("getService",
+            String::class.java
+        ).invoke(null, "notification")
+
+        Class.forName("android.app.INotificationManager\$Stub").getDeclaredMethod("asInterface", IBinder::class.java)
+            .invoke(null, notificationService)
     }
 
-    private val notificationChannelGroupsM = clazz.getDeclaredMethod(
+    private val notificationChannelGroupsM = sINM.javaClass.getDeclaredMethod(
         "getNotificationChannelGroupsForPackage",
         String::class.java,
         Int::class.java,
         Boolean::class.java) as Method
 
-    private val updateNotificationChannelForPackageM = clazz.getDeclaredMethod(
+    private val updateNotificationChannelForPackageM = sINM.javaClass.getDeclaredMethod(
         "updateNotificationChannelForPackage",
         String::class.java,
         Int::class.java,
@@ -42,14 +44,14 @@ class NCUtils(private val context : Context) {
     }
 
     private fun getNotificationChannelGroups(pkgName: String) =
-        notificationChannelGroupsM.invoke(null, pkgName, context.packageManager.getPackageUid(pkgName, 0), false).let {
+        notificationChannelGroupsM.invoke(sINM, pkgName, context.packageManager.getPackageUid(pkgName, 0), false).let {
             Class.forName("android.content.pm.ParceledListSlice").getDeclaredMethod("getList")
                 .invoke(it) as List<NotificationChannelGroup>
         }
 
     private fun setNotificationChannel(pkgName: String, channel: NotificationChannel): Any? =
         updateNotificationChannelForPackageM.invoke(
-            null, pkgName, context.packageManager.getPackageUid(pkgName, 0), channel
+            sINM, pkgName, context.packageManager.getPackageUid(pkgName, 0), channel
         )
 
     fun getNotificationChannelImportance(pkgName: String, channelName: String): Int {
