@@ -197,9 +197,10 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
     override fun onResume() {
         super.onResume()
         refreshState()
-        dataChannel("android").checkingVersionEquals {
-            androidRestartNeeded = !it
+        dataChannel("android").wait("${BuildConfig.APPLICATION_ID}_rec") {
+            androidRestartNeeded = false
             refreshState()
         }
+        dataChannel("android").put("${BuildConfig.APPLICATION_ID}_send")
     }
 }
