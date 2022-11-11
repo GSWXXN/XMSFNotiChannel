@@ -17,7 +17,11 @@ class HookEntry : IYukiHookXposedInit {
             "com.android.server.notification.NotificationManagerService".hook {
                 injectMember {
                     method { name = "isCallerSystemOrPhone" }
-                    replaceToTrue()
+                    beforeHook {
+                        if (appContext!!.packageManager.getPackageUid(BuildConfig.APPLICATION_ID, PackageManager.MATCH_ALL) == Binder.getCallingUid()) {
+                            resultTrue()
+                        }
+                    }
                 }
             }
         }
