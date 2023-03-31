@@ -1,13 +1,17 @@
 package com.gswxxn.xmsfnotichannel.activity
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.gswxxn.xmsfnotichannel.BuildConfig
 import com.gswxxn.xmsfnotichannel.R
+import com.gswxxn.xmsfnotichannel.activity.MainActivity.Companion.defaultChannelName
 import com.gswxxn.xmsfnotichannel.databinding.ActivityAboutPageBinding
 import com.gswxxn.xmsfnotichannel.utils.RoundDegree
 import com.gswxxn.xmsfnotichannel.utils.dp2px
@@ -32,6 +36,46 @@ class AboutPageActivity : BaseActivity() {
                         it.intrinsicHeight * 2
                     )
                 }, RoundDegree.RoundCorner))
+
+            var count = 0
+            var lastClickTime: Long = 0
+            appIcon.setOnClickListener {
+                val now = System.currentTimeMillis()
+
+                if (now - lastClickTime < 500) count++
+                else count = 1
+
+                lastClickTime = now
+
+                if (count != 5) return@setOnClickListener
+                count = 0
+
+                AlertDialog.Builder(this@AboutPageActivity).apply {
+                    val pref =  PreferenceManager.getDefaultSharedPreferences(this@AboutPageActivity)
+                    val input = EditText(this@AboutPageActivity).apply {
+                        setText(pref.getString("search_name", defaultChannelName))
+                    }
+                    setTitle(getString(R.string.searching_name))
+                    setMessage(getString(R.string.searching_name_summary))
+                    setView(input)
+                    setPositiveButton(getString(R.string.alert_ok)) { _, _ ->
+                        if (input.text.toString().isEmpty()) {
+                            Toast.makeText(this@AboutPageActivity, getString(R.string.can_not_be_empty), Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+                        pref.edit().putString("search_name", input.text.toString()).apply()
+                    }
+                    setNegativeButton(getString(R.string.alert_cancel)) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                    setNeutralButton(getString(R.string.alert_reset)) { _, _ ->
+                        pref.edit().putString("search_name", defaultChannelName).apply()
+                    }
+                }.create().apply {
+                    setCanceledOnTouchOutside(false)
+                }.show()
+
+            }
 
             miluIcon.setImageBitmap(roundBitmapByShader(
                 getDrawable(R.mipmap.img_developer)?.let {

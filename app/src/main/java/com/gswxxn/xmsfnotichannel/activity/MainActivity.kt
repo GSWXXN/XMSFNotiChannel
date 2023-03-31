@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.gswxxn.xmsfnotichannel.BuildConfig
 import com.gswxxn.xmsfnotichannel.R
 import com.gswxxn.xmsfnotichannel.databinding.ActivityMainBinding
@@ -14,13 +15,17 @@ import com.gswxxn.xmsfnotichannel.utils.AppInfoHelper
 import com.gswxxn.xmsfnotichannel.utils.NCUtils
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.dataChannel
-import com.highcapable.yukihookapi.hook.factory.hasClass
 import kotlinx.coroutines.*
 
 class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
+
+    companion object {
+        const val defaultChannelName = "运营消息"
+    }
+
     private var androidRestartNeeded = true
-    private val isMIUI = "android.miui.R".hasClass()
     private lateinit var binding: ActivityMainBinding
+    private var channelName = defaultChannelName
 
     override fun onCreate() {
         var appInfoFilter = listOf<AppInfoHelper.MyAppInfo>()
@@ -40,12 +45,13 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
 
         // 开始检测
         binding.actionButton.setOnClickListener {
-            if (!isMIUI || androidRestartNeeded) {
+            if (androidRestartNeeded) {
                 Toast.makeText(this, getString(R.string.check_active_toast), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             showView(false, binding.actionButton)
             showView(true, binding.configListLoadingView)
+            appInfo.pattern = channelName
             launch {
                 appInfoFilter = withContext(Dispatchers.Default) { appInfo.getAppInfoList() }
 
@@ -57,9 +63,9 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         // 一键开启
         binding.enableAll.setOnClickListener {
             appInfoFilter.forEach {
-                if (it.status == 0) {
-                    nc.enableOperationNotification(it.packageName)
-                    it.status = 3
+                if (it.ncInfo.importance == 0) {
+                    nc.enableSpecificNotification(it)
+                    it.ncInfo.importance = 3
                 }
             }
             onRefreshList?.invoke()
@@ -68,9 +74,9 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         // 一键关闭
         binding.disableAll.setOnClickListener {
             appInfoFilter.forEach {
-                if (it.status > 0) {
-                    nc.disableOperationNotification(it.packageName)
-                    it.status = 0
+                if (it.ncInfo.importance > 0) {
+                    nc.disableSpecificNotification(it)
+                    it.ncInfo.importance = 0
                 }
             }
             onRefreshList?.invoke()
@@ -78,6 +84,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
 
         // 重新检测
         binding.recheck.setOnClickListener {
+            appInfo.pattern = channelName
             launch {
                 showView(false, binding.configListView, binding.afterActions)
                 showView(true, binding.configListLoadingView)
@@ -92,6 +99,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         // 列表
         binding.configListView.apply {
             adapter = object : BaseAdapter() {
+
                 override fun getCount() = appInfoFilter.size
 
                 override fun getItem(position: Int) = appInfoFilter[position]
@@ -109,44 +117,59 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
                         holder = cView?.tag as AdapterConfigBinding
                     }
                     getItem(position).also {
+                        val openHint: String
+                        val closeHint: String
+                        if (channelName == defaultChannelName) {
+                            holder.adpChannelInfo.visibility = View.GONE
+                            openHint = getString(R.string.enabled_operation_notification)
+                            closeHint = getString(R.string.disabled_operation_notification)
+                        } else {
+                            holder.adpChannelInfo.visibility = View.VISIBLE
+                            openHint = getString(R.string.enabled_notification_other)
+                            closeHint = getString(R.string.disabled_notification_other)
+                        }
+
                         // 设置图标
                         holder.adpAppIcon.setImageDrawable(it.icon)
                         // 设置应用名
                         holder.adpAppName.text = it.appName
+                        // 设置组名
+                        holder.adpChannelGroup.text = it.ncInfo.channelGroupName.let { name -> if (name == "") getString(R.string.no_group) else name }
+                        // 设置通道名
+                        holder.adpChannelName.text = it.ncInfo.channelName
                         // 设置状态
                         holder.adpAppStatus.apply {
-                            text = getString(when (it.status) {
-                                -1 -> R.string.did_not_sent_operation_notification
-                                0 -> R.string.disabled_operation_notification
-                                else -> R.string.enabled_operation_notification
-                            })
+                            text = when (it.ncInfo.importance) {
+                                0 -> closeHint
+                                else -> openHint
+                            }
                             setTextColor(getColor(
-                                when (it.status) {
+                                when (it.ncInfo.importance) {
                                     -1 -> R.color.colorTextGray
-                                    0 -> R.color.green
-                                    else -> R.color.colorTextRed
+                                    0 -> R.color.colorTextRed
+                                    else -> R.color.green
                                 }
                             ))
                         }
                         // 设置LinearLayout
                         holder.adapterLayout.setOnClickListener { _ ->
-                            when (it.status) {
+                            when (it.ncInfo.importance) {
                                 -1 -> return@setOnClickListener
                                 0 -> {
-                                    nc.enableOperationNotification(it.packageName)
+                                    nc.enableSpecificNotification(it)
                                     holder.adpAppStatus.apply {
-                                        text = getString(R.string.enabled_operation_notification)
-                                        setTextColor(getColor(R.color.colorTextRed))
-                                    }
-                                    it.status = 3
-                                }
-                                else -> {
-                                    nc.disableOperationNotification(it.packageName)
-                                    holder.adpAppStatus.apply {
-                                        text = getString(R.string.disabled_operation_notification)
+                                        text = openHint
                                         setTextColor(getColor(R.color.green))
                                     }
-                                    it.status = 0
+                                    it.ncInfo.importance = 3
+                                }
+                                else -> {
+                                    nc.disableSpecificNotification(it)
+                                    holder.adpAppStatus.apply {
+                                        text = closeHint
+                                        setTextColor(getColor(R.color.colorTextRed))
+                                    }
+                                    it.ncInfo.importance = 0
                                 }
                             }
                         }
@@ -161,20 +184,19 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
 
         binding.mainStatus.setBackgroundResource(
             when {
-                YukiHookAPI.Status.isXposedModuleActive && (!isMIUI || androidRestartNeeded) -> R.drawable.bg_yellow_round
+                YukiHookAPI.Status.isXposedModuleActive && androidRestartNeeded -> R.drawable.bg_yellow_round
                 YukiHookAPI.Status.isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                YukiHookAPI.Status.isXposedModuleActive && isMIUI && !androidRestartNeeded -> R.drawable.ic_success
+                YukiHookAPI.Status.isXposedModuleActive && !androidRestartNeeded -> R.drawable.ic_success
                 else -> R.drawable.ic_warn
             }
         )
         binding.mainTextStatus.text = getString(
             when {
-                !isMIUI -> R.string.only_miui
                 YukiHookAPI.Status.isXposedModuleActive && androidRestartNeeded -> R.string.try_reboot
                 YukiHookAPI.Status.isXposedModuleActive -> R.string.module_is_active
                 else -> R.string.module_is_not_active
@@ -187,7 +209,7 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
 
         window.statusBarColor = getColor(
             when {
-                YukiHookAPI.Status.isXposedModuleActive && (!isMIUI || androidRestartNeeded) -> R.color.yellow
+                YukiHookAPI.Status.isXposedModuleActive &&  androidRestartNeeded -> R.color.yellow
                 YukiHookAPI.Status.isXposedModuleActive -> R.color.green
                 else -> R.color.gray
             }
@@ -202,5 +224,6 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
             refreshState()
         }
         dataChannel("android").put("${BuildConfig.APPLICATION_ID}_send")
+        channelName = PreferenceManager.getDefaultSharedPreferences(this).getString("search_name", defaultChannelName).toString()
     }
 }

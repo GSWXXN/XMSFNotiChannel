@@ -7,15 +7,24 @@
     <string name="xposed_framework_version">Activated by %s API %d</string>
     <string name="loading">正在加载……</string>
     <string name="check_active_toast">请检查模块是否激活</string>
-    <string name="did_not_sent_operation_notification">未发送过运营消息</string>
+    <string name="no_group">[无分组]</string>
     <string name="disabled_operation_notification">已关闭运营消息</string>
     <string name="enabled_operation_notification">已开启运营消息</string>
-    <string name="only_miui">该应用只能运行在MIUI系统中</string>
+    <string name="disabled_notification_other">已关闭</string>
+    <string name="enabled_notification_other">已开启</string>
     <string name="try_reboot">暂未获得权限，请尝试重启手机</string>
     <string name="start_check">开始检测</string>
     <string name="recheck">重新检测</string>
     <string name="enable_all">全部开启</string>
     <string name="disable_all">全部关闭</string>
+
+    <string name="alert_ok">确定</string>
+    <string name="alert_cancel">取消</string>
+    <string name="alert_reset">恢复默认</string>
+    <string name="can_not_be_empty">搜索名称不能为空</string>
+    <string name="searching_name">通知通道搜索名称</string>
+    <string name="searching_name_summary">支持正则匹配</string>
+
     <string name="version">v%s</string>
     <string name="follow_me">点个关注，不迷路</string>
     <string name="star_project">点个小星星呗~</string>

@@ -32,17 +32,6 @@ class NCUtils(private val context : Context) {
         Int::class.java,
         NotificationChannel::class.java) as Method
 
-    private fun setOperationNotification(pkgName: String, importance: Int) {
-        getNotificationChannelGroups(pkgName).forEach { group ->
-            group.channels.forEach { channel ->
-                if (channel.name == "运营消息") {
-                    channel.importance = importance
-                    setNotificationChannel(pkgName, channel)
-                }
-            }
-        }
-    }
-
     private fun getNotificationChannelGroups(pkgName: String) =
         notificationChannelGroupsM.invoke(sINM, pkgName, context.packageManager.getPackageUid(pkgName, 0), false).let {
             Class.forName("android.content.pm.ParceledListSlice").getDeclaredMethod("getList")
@@ -54,18 +43,33 @@ class NCUtils(private val context : Context) {
             sINM, pkgName, context.packageManager.getPackageUid(pkgName, 0), channel
         )
 
-    fun getNotificationChannelImportance(pkgName: String, channelName: String): Int {
+    // 获取通知通道信息
+    fun getNotificationChannelInfoByRegex(pkgName: String, channelNameRegex: String): List<AppInfoHelper.NCInfo> {
+        val ncInfoList = mutableListOf<AppInfoHelper.NCInfo>()
         getNotificationChannelGroups(pkgName).forEach{ notificationChannelGroup ->
             notificationChannelGroup.channels.forEach {
-                if (it.name == channelName) return it.importance
+                if (it.name.matches(Regex(channelNameRegex)))
+                    ncInfoList.add(AppInfoHelper.NCInfo(notificationChannelGroup.name.toString(), it.name.toString(), it.importance))
             }
         }
-        return -1
+        return ncInfoList
     }
 
-    fun disableOperationNotification(pkgName: String) =
-        setOperationNotification(pkgName, NotificationManager.IMPORTANCE_NONE)
+    fun enableSpecificNotification(appInfo: AppInfoHelper.MyAppInfo) {
+        getNotificationChannelGroups(appInfo.packageName).forEach { group ->
+            group.channels.forEach { channel ->
+                channel.importance = NotificationManager.IMPORTANCE_DEFAULT
+                setNotificationChannel(appInfo.packageName, channel)
+            }
+        }
+    }
 
-    fun enableOperationNotification(pkgName: String) =
-        setOperationNotification(pkgName, NotificationManager.IMPORTANCE_DEFAULT)
+    fun disableSpecificNotification(appInfo: AppInfoHelper.MyAppInfo) {
+        getNotificationChannelGroups(appInfo.packageName).forEach { group ->
+            group.channels.forEach { channel ->
+                channel.importance = NotificationManager.IMPORTANCE_NONE
+                setNotificationChannel(appInfo.packageName, channel)
+            }
+        }
+    }
 }
