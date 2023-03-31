@@ -14,6 +14,7 @@ import com.gswxxn.xmsfnotichannel.databinding.AdapterConfigBinding
 import com.gswxxn.xmsfnotichannel.utils.AppInfoHelper
 import com.gswxxn.xmsfnotichannel.utils.NCUtils
 import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.YukiHookAPI.Status.Executor
 import com.highcapable.yukihookapi.hook.factory.dataChannel
 import kotlinx.coroutines.*
 
@@ -204,8 +205,9 @@ class MainActivity : BaseActivity(), CoroutineScope by MainScope() {
         showView(YukiHookAPI.Status.isXposedModuleActive, binding.mainTextApiWay)
         binding.mainTextApiWay.text =
             getString(R.string.xposed_framework_version,
-                YukiHookAPI.Status.executorName,
-                YukiHookAPI.Status.executorVersion)
+                Executor.name,
+                Executor.apiLevel
+            )
 
         window.statusBarColor = getColor(
             when {
