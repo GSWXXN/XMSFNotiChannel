@@ -49,7 +49,7 @@ class NCUtils(private val context : Context) {
         getNotificationChannelGroups(pkgName).forEach{ notificationChannelGroup ->
             notificationChannelGroup.channels.forEach {
                 if (it.name.matches(Regex(channelNameRegex)))
-                    ncInfoList.add(AppInfoHelper.NCInfo(notificationChannelGroup.name.toString(), it.name.toString(), it.importance))
+                    ncInfoList.add(AppInfoHelper.NCInfo(notificationChannelGroup.name?.toString() ?: "", it.name.toString(), it.importance))
             }
         }
         return ncInfoList
@@ -58,8 +58,10 @@ class NCUtils(private val context : Context) {
     fun enableSpecificNotification(appInfo: AppInfoHelper.MyAppInfo) {
         getNotificationChannelGroups(appInfo.packageName).forEach { group ->
             group.channels.forEach { channel ->
-                channel.importance = NotificationManager.IMPORTANCE_DEFAULT
-                setNotificationChannel(appInfo.packageName, channel)
+                if (channel.name == appInfo.ncInfo.channelName) {
+                    channel.importance = NotificationManager.IMPORTANCE_DEFAULT
+                    setNotificationChannel(appInfo.packageName, channel)
+                }
             }
         }
     }
@@ -67,8 +69,10 @@ class NCUtils(private val context : Context) {
     fun disableSpecificNotification(appInfo: AppInfoHelper.MyAppInfo) {
         getNotificationChannelGroups(appInfo.packageName).forEach { group ->
             group.channels.forEach { channel ->
-                channel.importance = NotificationManager.IMPORTANCE_NONE
-                setNotificationChannel(appInfo.packageName, channel)
+                if (channel.name == appInfo.ncInfo.channelName) {
+                    channel.importance = NotificationManager.IMPORTANCE_NONE
+                    setNotificationChannel(appInfo.packageName, channel)
+                }
             }
         }
     }
