@@ -97,6 +97,30 @@
                 android:elevation="0dp"
                 android:gravity="center"
                 android:orientation="vertical"
+                android:padding="15dp">
+
+                <Switch
+                    android:id="@+id/hide_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="25dp"
+                    android:textSize="15sp"
+                    android:text="@string/hide_icon"
+                    android:textColor="@color/colorTextGray" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:animateLayoutChanges="true"
+                android:background="@drawable/bg_permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
                 android:paddingLeft="15dp"
                 android:paddingTop="15dp"
                 android:paddingRight="15dp">

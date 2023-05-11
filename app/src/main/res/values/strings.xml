@@ -34,5 +34,6 @@
     <string name="developer_milu">迷璐</string>
     <string name="open_source_repo">开源仓库</string>
     <string name="open_source_license">开放源代码许可</string>
+    <string name="hide_icon">隐藏桌面图标</string>
 
 </resources>
