@@ -2,7 +2,9 @@ package com.gswxxn.xmsfnotichannel.activity
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -88,6 +90,20 @@ class AboutPageActivity : BaseActivity() {
             )
 
             version.text = getString(R.string.version, BuildConfig.VERSION_NAME)
+
+            val componentName = ComponentName(this@AboutPageActivity, MainActivity::class.java)
+            hideIcon.isChecked = packageManager.getComponentEnabledSetting(componentName) ==
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            hideIcon.setOnClickListener {
+                val newState =
+                    if (hideIcon.isChecked) PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    else PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                packageManager.setComponentEnabledSetting(
+                    componentName,
+                    newState,
+                    PackageManager.DONT_KILL_APP
+                )
+            }
 
             developerMilu.setOnClickListener {
                 Toast.makeText(this@AboutPageActivity, getString(R.string.follow_me), Toast.LENGTH_SHORT).show()
